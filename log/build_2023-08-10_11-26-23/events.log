@@ -1,0 +1,137 @@
+[0.000000] (-) TimerEvent: {}
+[0.004555] (f1tenth_strategy_node) JobQueued: {'identifier': 'f1tenth_strategy_node', 'dependencies': OrderedDict()}
+[0.004779] (f1tenth_strategy_node) JobStarted: {'identifier': 'f1tenth_strategy_node'}
+[0.103685] (-) TimerEvent: {}
+[0.205437] (-) TimerEvent: {}
+[0.316764] (-) TimerEvent: {}
+[0.419163] (-) TimerEvent: {}
+[0.551790] (-) TimerEvent: {}
+[0.656011] (-) TimerEvent: {}
+[0.768733] (-) TimerEvent: {}
+[0.873500] (-) TimerEvent: {}
+[0.991594] (-) TimerEvent: {}
+[1.149657] (-) TimerEvent: {}
+[1.260707] (-) TimerEvent: {}
+[1.368731] (-) TimerEvent: {}
+[1.564053] (-) TimerEvent: {}
+[1.675071] (-) TimerEvent: {}
+[1.834879] (-) TimerEvent: {}
+[1.965323] (-) TimerEvent: {}
+[2.066499] (-) TimerEvent: {}
+[2.169735] (-) TimerEvent: {}
+[2.273582] (-) TimerEvent: {}
+[2.382344] (-) TimerEvent: {}
+[2.485719] (-) TimerEvent: {}
+[2.611862] (-) TimerEvent: {}
+[2.718318] (-) TimerEvent: {}
+[2.865681] (-) TimerEvent: {}
+[2.971499] (-) TimerEvent: {}
+[3.092834] (-) TimerEvent: {}
+[3.196407] (-) TimerEvent: {}
+[3.315229] (-) TimerEvent: {}
+[3.451462] (-) TimerEvent: {}
+[3.556475] (-) TimerEvent: {}
+[3.674170] (-) TimerEvent: {}
+[3.777163] (-) TimerEvent: {}
+[3.885437] (-) TimerEvent: {}
+[3.989549] (-) TimerEvent: {}
+[4.096525] (-) TimerEvent: {}
+[4.227807] (-) TimerEvent: {}
+[4.345425] (-) TimerEvent: {}
+[4.454560] (-) TimerEvent: {}
+[4.555892] (-) TimerEvent: {}
+[4.691888] (-) TimerEvent: {}
+[4.797442] (-) TimerEvent: {}
+[4.917309] (-) TimerEvent: {}
+[5.020572] (-) TimerEvent: {}
+[5.146383] (-) TimerEvent: {}
+[5.248847] (-) TimerEvent: {}
+[5.351748] (-) TimerEvent: {}
+[5.460290] (-) TimerEvent: {}
+[5.584617] (-) TimerEvent: {}
+[5.700641] (-) TimerEvent: {}
+[5.842395] (-) TimerEvent: {}
+[5.943892] (-) TimerEvent: {}
+[6.059712] (-) TimerEvent: {}
+[6.186130] (-) TimerEvent: {}
+[6.288964] (-) TimerEvent: {}
+[6.391964] (-) TimerEvent: {}
+[6.493636] (-) TimerEvent: {}
+[6.595316] (-) TimerEvent: {}
+[6.696640] (-) TimerEvent: {}
+[6.797669] (-) TimerEvent: {}
+[6.909271] (-) TimerEvent: {}
+[7.011477] (-) TimerEvent: {}
+[7.072742] (f1tenth_strategy_node) Command: {'cmd': ['/usr/bin/python3', 'setup.py', 'develop', '--editable', '--build-directory', '/home/f1tenth/Desktop/project/build/f1tenth_strategy_node/build', '--no-deps', 'install_data'], 'cwd': '/home/f1tenth/Desktop/project/build/f1tenth_strategy_node', 'env': {'GJS_DEBUG_TOPICS': 'JS ERROR;JS LOG', 'LESSOPEN': '| /usr/bin/lesspipe %s', 'LANGUAGE': 'en_US:', 'USER': 'f1tenth', 'LC_TIME': 'de_DE.UTF-8', 'SSH_AGENT_PID': '1455', 'XDG_SESSION_TYPE': 'x11', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/foxy/opt/yaml_cpp_vendor/lib:/opt/ros/foxy/opt/rviz_ogre_vendor/lib:/opt/ros/foxy/lib/x86_64-linux-gnu:/opt/ros/foxy/lib', 'HOME': '/home/f1tenth', 'OLDPWD': '/home/f1tenth/Desktop', 'DESKTOP_SESSION': 'ubuntu', 'GIO_LAUNCHED_DESKTOP_FILE': '/usr/share/applications/terminator.desktop', 'ROS_PYTHON_VERSION': '3', 'GNOME_SHELL_SESSION_MODE': 'ubuntu', 'GTK_MODULES': 'gail:atk-bridge', 'LC_MONETARY': 'de_DE.UTF-8', 'MANAGERPID': '1285', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'TERMINATOR_DBUS_NAME': 'net.tenshu.Terminator21a9d5db22c73a993ff0b42f64b396873', 'GIO_LAUNCHED_DESKTOP_FILE_PID': '3503', 'IM_CONFIG_PHASE': '1', 'COLCON_PREFIX_PATH': '/home/f1tenth/sim/f1tenth_gym_ros/install', 'ROS_DISTRO': 'foxy', 'LOGNAME': 'f1tenth', 'JOURNAL_STREAM': '8:35936', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'USERNAME': 'f1tenth', 'TERM': 'xterm-256color', 'GNOME_DESKTOP_SESSION_ID': 'this-is-deprecated', 'ROS_LOCALHOST_ONLY': '0', 'WINDOWPATH': '2', 'PATH': '/opt/ros/foxy/bin:/home/f1tenth/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'SESSION_MANAGER': 'local/f1tenth:@/tmp/.ICE-unix/1501,unix/f1tenth:/tmp/.ICE-unix/1501', 'INVOCATION_ID': '7d11818073044728b4ac413bcffcbd86', 'XDG_MENU_PREFIX': 'gnome-', 'LC_ADDRESS': 'de_DE.UTF-8', 'XDG_RUNTIME_DIR': '/run/user/1000', 'DISPLAY': ':0', 'TERMINATOR_DBUS_PATH': '/net/tenshu/Terminator2', 'LANG': 'en_US', 'XDG_CURRENT_DESKTOP': 'ubuntu:GNOME', 'LC_TELEPHONE': 'de_DE.UTF-8', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'ubuntu', 'XAUTHORITY': '/run/user/1000/gdm/Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'SSH_AUTH_SOCK': '/run/user/1000/keyring/ssh', 'AMENT_PREFIX_PATH': '/home/f1tenth/sim/f1tenth_gym_ros/install/f1tenth_gym_ros:/opt/ros/foxy', 'SHELL': '/bin/bash', 'LC_NAME': 'de_DE.UTF-8', 'TERMINATOR_UUID': 'urn:uuid:a85656ec-b377-4f3a-b18a-534f7027fbd1', 'QT_ACCESSIBILITY': '1', 'GDMSESSION': 'ubuntu', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'LC_MEASUREMENT': 'de_DE.UTF-8', 'GPG_AGENT_INFO': '/run/user/1000/gnupg/S.gpg-agent:0:1', 'GJS_DEBUG_OUTPUT': 'stderr', 'LC_IDENTIFICATION': 'de_DE.UTF-8', 'QT_IM_MODULE': 'ibus', 'PWD': '/home/f1tenth/Desktop/project/build/f1tenth_strategy_node', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-ubuntu:/etc/xdg', 'XDG_DATA_DIRS': '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/f1tenth/Desktop/project/build/f1tenth_strategy_node/prefix_override:/home/f1tenth/Desktop/project/install/f1tenth_strategy_node/lib/python3.8/site-packages:/home/f1tenth/sim/f1tenth_gym_ros/build/f1tenth_gym_ros:/home/f1tenth/sim/f1tenth_gym_ros/install/f1tenth_gym_ros/lib/python3.8/site-packages:/opt/ros/foxy/lib/python3.8/site-packages', 'LC_NUMERIC': 'de_DE.UTF-8', 'LC_PAPER': 'de_DE.UTF-8', 'COLCON': '1', 'VTE_VERSION': '6003'}, 'shell': False}
+[7.126947] (-) TimerEvent: {}
+[7.232276] (-) TimerEvent: {}
+[7.351776] (-) TimerEvent: {}
+[7.456231] (-) TimerEvent: {}
+[7.568843] (-) TimerEvent: {}
+[7.671413] (-) TimerEvent: {}
+[7.786574] (-) TimerEvent: {}
+[7.917534] (-) TimerEvent: {}
+[8.037741] (-) TimerEvent: {}
+[8.146806] (-) TimerEvent: {}
+[8.250108] (-) TimerEvent: {}
+[8.377630] (-) TimerEvent: {}
+[8.504482] (-) TimerEvent: {}
+[8.608455] (-) TimerEvent: {}
+[8.723839] (-) TimerEvent: {}
+[8.825842] (-) TimerEvent: {}
+[8.929888] (-) TimerEvent: {}
+[9.057709] (-) TimerEvent: {}
+[9.181855] (-) TimerEvent: {}
+[9.326156] (-) TimerEvent: {}
+[9.401847] (f1tenth_strategy_node) StdoutLine: {'line': b'running develop\n'}
+[9.427149] (-) TimerEvent: {}
+[9.563450] (-) TimerEvent: {}
+[9.674313] (-) TimerEvent: {}
+[9.775476] (-) TimerEvent: {}
+[9.880262] (-) TimerEvent: {}
+[9.985497] (-) TimerEvent: {}
+[10.088795] (-) TimerEvent: {}
+[10.191217] (-) TimerEvent: {}
+[10.312215] (-) TimerEvent: {}
+[10.429804] (-) TimerEvent: {}
+[10.448277] (f1tenth_strategy_node) StdoutLine: {'line': b'running egg_info\n'}
+[10.450946] (f1tenth_strategy_node) StdoutLine: {'line': b'creating f1tenth_strategy_node.egg-info\n'}
+[10.453487] (f1tenth_strategy_node) StdoutLine: {'line': b'writing f1tenth_strategy_node.egg-info/PKG-INFO\n'}
+[10.457741] (f1tenth_strategy_node) StdoutLine: {'line': b'writing dependency_links to f1tenth_strategy_node.egg-info/dependency_links.txt\n'}
+[10.459422] (f1tenth_strategy_node) StdoutLine: {'line': b'writing entry points to f1tenth_strategy_node.egg-info/entry_points.txt\n'}
+[10.462260] (f1tenth_strategy_node) StdoutLine: {'line': b'writing requirements to f1tenth_strategy_node.egg-info/requires.txt\n'}
+[10.463355] (f1tenth_strategy_node) StdoutLine: {'line': b'writing top-level names to f1tenth_strategy_node.egg-info/top_level.txt\n'}
+[10.487687] (f1tenth_strategy_node) StdoutLine: {'line': b"writing manifest file 'f1tenth_strategy_node.egg-info/SOURCES.txt'\n"}
+[10.532174] (-) TimerEvent: {}
+[10.633809] (-) TimerEvent: {}
+[10.733472] (f1tenth_strategy_node) StdoutLine: {'line': b"reading manifest file 'f1tenth_strategy_node.egg-info/SOURCES.txt'\n"}
+[10.734230] (-) TimerEvent: {}
+[10.739227] (f1tenth_strategy_node) StdoutLine: {'line': b"writing manifest file 'f1tenth_strategy_node.egg-info/SOURCES.txt'\n"}
+[10.836546] (-) TimerEvent: {}
+[11.159314] (-) TimerEvent: {}
+[11.268128] (-) TimerEvent: {}
+[11.404839] (-) TimerEvent: {}
+[11.523283] (-) TimerEvent: {}
+[11.531781] (f1tenth_strategy_node) StdoutLine: {'line': b'running build_ext\n'}
+[11.543434] (f1tenth_strategy_node) StdoutLine: {'line': b'Creating /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/lib/python3.8/site-packages/site.py\n'}
+[11.553706] (f1tenth_strategy_node) StdoutLine: {'line': b'Creating /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/lib/python3.8/site-packages/f1tenth-strategy-node.egg-link (link to .)\n'}
+[11.556786] (f1tenth_strategy_node) StdoutLine: {'line': b'Installing fsm script to /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/lib/f1tenth_strategy_node\n'}
+[11.562514] (f1tenth_strategy_node) StdoutLine: {'line': b'Installing obstacle script to /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/lib/f1tenth_strategy_node\n'}
+[11.563317] (f1tenth_strategy_node) StdoutLine: {'line': b'Installing vehicle script to /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/lib/f1tenth_strategy_node\n'}
+[11.563728] (f1tenth_strategy_node) StdoutLine: {'line': b'\n'}
+[11.564103] (f1tenth_strategy_node) StdoutLine: {'line': b'Installed /home/f1tenth/Desktop/project/build/f1tenth_strategy_node\n'}
+[11.564478] (f1tenth_strategy_node) StdoutLine: {'line': b'running install_data\n'}
+[11.564826] (f1tenth_strategy_node) StdoutLine: {'line': b'creating /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/share/ament_index\n'}
+[11.565473] (f1tenth_strategy_node) StdoutLine: {'line': b'creating /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/share/ament_index/resource_index\n'}
+[11.623582] (f1tenth_strategy_node) StdoutLine: {'line': b'creating /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/share/ament_index/resource_index/packages\n'}
+[11.637466] (-) TimerEvent: {}
+[11.637756] (f1tenth_strategy_node) StdoutLine: {'line': b'copying resource/f1tenth_strategy_node -> /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/share/ament_index/resource_index/packages\n'}
+[11.638314] (f1tenth_strategy_node) StdoutLine: {'line': b'copying package.xml -> /home/f1tenth/Desktop/project/install/f1tenth_strategy_node/share/f1tenth_strategy_node\n'}
+[11.738535] (-) TimerEvent: {}
+[11.802330] (f1tenth_strategy_node) CommandEnded: {'returncode': 0}
+[11.855545] (-) TimerEvent: {}
+[11.957307] (-) TimerEvent: {}
+[12.077771] (-) TimerEvent: {}
+[12.187340] (-) TimerEvent: {}
+[12.255970] (f1tenth_strategy_node) JobEnded: {'identifier': 'f1tenth_strategy_node', 'rc': 0}
+[12.259692] (-) EventReactorShutdown: {}

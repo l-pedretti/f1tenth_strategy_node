@@ -21,7 +21,7 @@ setup(
     entry_points={
             'console_scripts': [
                     'obstacle = f1tenth_strategy_node.publisher_obstacle:main',
-                    'vehicle = f1tenth_strategy_node.publisher_vehicle:main',
+                    'car = f1tenth_strategy_node.publisher_car:main',
                     'fsm = f1tenth_strategy_node.subscriber_fsm:main',
             ],
     },

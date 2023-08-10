@@ -1,0 +1,5 @@
+[console_scripts]
+car = f1tenth_strategy_node.publisher_car:main
+fsm = f1tenth_strategy_node.subscriber_fsm:main
+obstacle = f1tenth_strategy_node.publisher_obstacle:main
+

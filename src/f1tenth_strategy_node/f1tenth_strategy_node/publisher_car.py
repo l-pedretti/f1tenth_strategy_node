@@ -10,10 +10,10 @@ from squaternion import Quaternion
 class CarPublisher(Node):
         def __init__(self):
             super().__init__('car_publisher')
-            self.publisher_ = self.create_publisher(Odometry, 'odometry', 10)
+            self.publisher_ = self.create_publisher(Odometry, 'car', 10)
             timer_period = 0.1
             self.timer = self.create_timer(timer_period, self.timer_callback)
-
+            self.deg = 0
         def timer_callback(self):
             msg = Odometry()
             msg.header.stamp = self.get_clock().now().to_msg()

@@ -14,36 +14,56 @@
 
 import rclpy
 from rclpy.node import Node
-
+from geometry_msgs.msg import Pose, PoseArray
 from std_msgs.msg import String
 
+from nav_msgs.msg import Odometry
+from rclpy.executors import MultiThreadedExecutor
 
-class MinimalSubscriber(Node):
+class ObstacleSubscriber(Node):
 
     def __init__(self):
-        super().__init__('minimal_subscriber')
+        super().__init__('obstacle_subscriber')
         self.subscription = self.create_subscription(
-            String,
-            'topic',
+            PoseArray,
+            'obstacle',
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.data)
+        self.get_logger().info('I heard: "%s"' % msg)
+
+class CarSubscriber(Node):
+
+    def __init__(self):
+        super().__init__('car_subscriber')
+        self.subscription = self.create_subscription(
+            Odometry,
+            'car',
+            self.listener_callback,
+            10)
+        self.subscription  # prevent unused variable warning
+
+    def listener_callback(self, msg):
+        self.get_logger().info('I heard: "%s"' % msg)
 
 
 def main(args=None):
     rclpy.init(args=args)
+    executor = MultiThreadedExecutor()
+    obstacle_subscriber = ObstacleSubscriber()
+    executor.add_node(obstacle_subscriber)
+    car_subscriber = CarSubscriber()
+    executor.add_node(car_subscriber)
 
-    minimal_subscriber = MinimalSubscriber()
-
-    rclpy.spin(minimal_subscriber)
+    executor.spin()
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    obstacle_subscriber.destroy_node()
+    car_subscriber.destroy_node()
     rclpy.shutdown()
 
 
