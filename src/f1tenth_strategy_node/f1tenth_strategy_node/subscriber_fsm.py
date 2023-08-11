@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#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
+# 
 import rclpy, time
 from rclpy.node import Node
 from geometry_msgs.msg import Pose, PoseArray
@@ -25,8 +25,13 @@ from rclpy.executors import MultiThreadedExecutor
 
 globalStart = False
 readyStart = False
-countObs, di, d0, dth = 0
+countObs = 0
+di = 0
+d0 = 0 
+dth = 0
 minL = 0
+obsList = []
+
 class ObstacleSubscriber(Node):
 
     def __init__(self):
@@ -93,14 +98,14 @@ class FollowState(State):
         print("Executing state FOLLOW")
         time.sleep(3)
 
-    if di <= d0:
-        return "OI"
-    elif d0 < di:
-        return "OO"
-    elif countObs == 0:
-        return "G"
-    elif
-        return "R"
+        if di <= d0:
+            return "OI"
+        elif d0 < di:
+            return "OO"
+        elif countObs == 0:
+            return "G"
+        elif readyStart == True:
+            return "R"
 
 # define state OI
 class OIState(State):
@@ -126,20 +131,31 @@ class OOState(State):
         print(blackboard.foo_str)
         return "outcome3"
     
-class DemoNode(Node):
+class fsmNode(Node):
 
     def __init__(self):
-        super().__init__("yasmin_node")
+        super().__init__("fsm_node")
 
         # create a state machine
-        sm = StateMachine(outcomes=["outcome4"])
+        sm = StateMachine(outcomes=["shutdown"])
 
         # add states
-        sm.add_state("FOO", FooState(),
-                     transitions={"outcome1": "BAR",
-                                  "outcome2": "outcome4"})
-        sm.add_state("BAR", BarState(),
-                     transitions={"outcome3": "FOO"})
+        sm.add_state("READY", ReadyState(),
+                     transitions={"G": "GLOBAL"})
+        sm.add_state("GLOBAL", GlobalState(),
+                     transitions={"F": "FOLLOW",
+                                  "R": "READY"})
+        sm.add_state("FOLLOW", FollowState(),
+                     transitions={"OI": "OVERTAKE INSIDE",
+                                  "OO": "OVERTAKE OUTSIDE"})
+
+        sm.add_state("OVERTAKE INSIDE", OIState(),
+                     transitions={"G": "GLOBAL",
+                                  "R": "READY"})
+        sm.add_state("OVERTAKE OUTSIDE", OOState(),
+                     transitions={"G": "GLOBAL",
+                                  "R": "READY"})
+
 
         # pub
         YasminViewerPub(self, "YASMIN_DEMO", sm)
@@ -147,6 +163,13 @@ class DemoNode(Node):
         # execute
         outcome = sm()
         print(outcome)
+
+class Obstacle():
+
+    def __init__(self):
+        self.pose = 0
+        self.di = 0
+        self.d0 = 0
 
 def main(args=None):
     rclpy.init(args=args)
@@ -157,7 +180,8 @@ def main(args=None):
     executor.add_node(car_subscriber)
 
     executor.spin()
-
+    o = Obstacle()
+    obsList.append(o)
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
