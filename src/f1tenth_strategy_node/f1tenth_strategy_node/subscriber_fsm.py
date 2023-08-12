@@ -17,11 +17,14 @@ from rclpy.node import Node
 from geometry_msgs.msg import Pose, PoseArray
 from std_msgs.msg import String
 
-from yasmin import State
+from yasmin import State as yState
 from yasmin import StateMachine
 from yasmin_viewer import YasminViewerPub
 from nav_msgs.msg import Odometry
 from rclpy.executors import MultiThreadedExecutor
+from f1tenth_strategy_node.lifecycle import LifecycleNode
+from lifecycle_msgs.msg import State as lState
+from lifecycle_msgs.msg import Transition
 
 globalStart = False
 readyStart = False
@@ -31,6 +34,62 @@ d0 = 0
 dth = 0
 minL = 0
 obsList = []
+
+
+class LifecycleTalker (LifecycleNode):
+    def __init__(self):
+        super().__init__("lc_talker")
+        self.pubcount = 0
+        self.obstacle_subscriber = 0
+        self.obstacle_car = 0
+        self.fsm_node =  0
+    def on_configure(self, distanceth):
+        self.pub = self.create_publisher(String, "lifecycle_chatter", 10)
+        dth = distanceth
+        self.get_logger().info("on_configure() is called")
+
+        self.create_timer(1.0, self.publish_callback)
+
+        return Transition.TRANSITION_CALLBACK_SUCCESS
+    
+    def on_cleanup(self):
+        self.get_logger().info("on_cleanup() is called")
+        globalStart = False
+        readyStart = False
+        countObs = 0
+        di = 0
+        d0 = 0 
+        dth = 0
+        minL = 0
+        obsList = []
+        return Transition.TRANSITION_CALLBACK_SUCCESS
+    
+    def on_activate(self):
+        self.get_logger().info("on_activate() is called")
+        executor = MultiThreadedExecutor()
+        
+        executor.add_node(self.obstacle_subscriber)
+        self.obstacle_subscriber = ObstacleSubscriber()
+        executor.add_node(self.car_subscriber)
+        self.car_subscriber = CarSubscriber()
+        self.fsm_node = fsmNode()
+        executor.add_node(self.fsm_node)
+        executor.spin()
+        return Transition.TRANSITION_CALLBACK_SUCCESS
+    
+    def on_deactivate(self):
+        self.get_logger().info("on_deactivate() is called")
+        self.obstacle_subscriber.destroy_node()
+        self.car_subscriber.destroy_node()
+        self.fsm_node.destoy_node()
+        return Transition.TRANSITION_CALLBACK_SUCCESS
+
+    def publish_callback(self):
+        if(self.state == lState.PRIMARY_STATE_ACTIVE):
+            self.pubcount += 1
+            self.pub.publish(String(data = "Lifecycle (Python) Hello World #" + str(self.pubcount)))
+
+
 
 class ObstacleSubscriber(Node):
 
@@ -62,27 +121,24 @@ class CarSubscriber(Node):
 
 
 # define state Ready
-class ReadyState(State):
+class ReadyState(yState):
     def __init__(self):
         super().__init__(outcomes=["G"])
 
     def execute(self, blackboard):
         print("Executing state READY")
-        time.sleep(3)
-
         
         if globalStart == True:
             return "G"
 
 # define state Global
-class GlobalState(State):
+class GlobalState(yState):
     def __init__(self):
         super().__init__(outcomes=["F", "R"])
         self.counter = 0
 
     def execute(self, blackboard):
         print("Executing state GLOBAL")
-        time.sleep(3)
 
         if countObs == 0:
             return "R"
@@ -90,13 +146,12 @@ class GlobalState(State):
             return "F"
 
 # define state Follow
-class FollowState(State):
+class FollowState(yState):
     def __init__(self):
         super().__init__(outcomes=["OI", "OO", "G", "R"])
 
     def execute(self, blackboard):
         print("Executing state FOLLOW")
-        time.sleep(3)
 
         if di <= d0:
             return "OI"
@@ -108,25 +163,23 @@ class FollowState(State):
             return "R"
 
 # define state OI
-class OIState(State):
+class OIState(yState):
     def __init__(self):
         super().__init__(outcomes=["G", "R"])
 
     def execute(self, blackboard):
         print("Executing state OVERTAKE INSIDE")
-        time.sleep(3)
 
         print(blackboard.foo_str)
         return "outcome3"
 
 # define state OO
-class OOState(State):
+class OOState(yState):
     def __init__(self):
         super().__init__(outcomes=["G", "R"])
 
     def execute(self, blackboard):
         print("Executing state OVERTAKE OUTSIDE")
-        time.sleep(3)
 
         print(blackboard.foo_str)
         return "outcome3"
@@ -158,7 +211,7 @@ class fsmNode(Node):
 
 
         # pub
-        YasminViewerPub(self, "YASMIN_DEMO", sm)
+        YasminViewerPub(self, "strategy_fsm_node", sm)
 
         # execute
         outcome = sm()
@@ -173,20 +226,14 @@ class Obstacle():
 
 def main(args=None):
     rclpy.init(args=args)
-    executor = MultiThreadedExecutor()
-    obstacle_subscriber = ObstacleSubscriber()
-    executor.add_node(obstacle_subscriber)
-    car_subscriber = CarSubscriber()
-    executor.add_node(car_subscriber)
-
-    executor.spin()
+    
     o = Obstacle()
     obsList.append(o)
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    obstacle_subscriber.destroy_node()
-    car_subscriber.destroy_node()
+    
+    lifecycle_talker = LifecycleTalker()
+    
+    rclpy.spin(lifecycle_talker)
+
     rclpy.shutdown()
 
 
