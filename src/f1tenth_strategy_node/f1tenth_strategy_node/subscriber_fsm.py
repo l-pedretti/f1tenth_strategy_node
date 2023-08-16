@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+
 import rclpy, time
 from rclpy.node import Node
 from geometry_msgs.msg import Pose, PoseArray
@@ -31,7 +31,6 @@ readyStart = False
 countObs = 0
 di = 0
 d0 = 0 
-dth = 0
 minL = 0
 obsList = []
 
@@ -43,13 +42,19 @@ class LifecycleTalker (LifecycleNode):
         self.obstacle_subscriber = 0
         self.obstacle_car = 0
         self.fsm_node =  0
-    def on_configure(self, distanceth):
+        self.declare_parameter('dth', 0)
+        
+    def on_configure(self):
         self.pub = self.create_publisher(String, "lifecycle_chatter", 10)
-        dth = distanceth
         self.get_logger().info("on_configure() is called")
-
         self.create_timer(1.0, self.publish_callback)
-
+        dth = rclpy.parameter.Parameter(
+            'dth',
+            rclpy.Parameter.Type.INTEGER,
+            0
+        )
+        parameters = [dth]
+        self.set_parameters(parameters)
         return Transition.TRANSITION_CALLBACK_SUCCESS
     
     def on_cleanup(self):
@@ -67,12 +72,12 @@ class LifecycleTalker (LifecycleNode):
     def on_activate(self):
         self.get_logger().info("on_activate() is called")
         executor = MultiThreadedExecutor()
-        
-        executor.add_node(self.obstacle_subscriber)
         self.obstacle_subscriber = ObstacleSubscriber()
-        executor.add_node(self.car_subscriber)
         self.car_subscriber = CarSubscriber()
         self.fsm_node = fsmNode()
+
+        executor.add_node(self.obstacle_subscriber)
+        executor.add_node(self.car_subscriber)
         executor.add_node(self.fsm_node)
         executor.spin()
         return Transition.TRANSITION_CALLBACK_SUCCESS
@@ -120,38 +125,48 @@ class CarSubscriber(Node):
         self.get_logger().info('I heard: "%s"' % msg)
 
 
-# define state Ready
+class Obstacle():
+
+    def __init__(self):
+        self.pose = 0
+        self.di = 0
+        self.d0 = 0
+
 class ReadyState(yState):
     def __init__(self):
-        super().__init__(outcomes=["G"])
+        super().__init__(["G","R"])
 
     def execute(self, blackboard):
-        print("Executing state READY")
-        
+        print("Executing state Ready")
+
         if globalStart == True:
             return "G"
+        else:
+            return "R"
+    
 
-# define state Global
 class GlobalState(yState):
     def __init__(self):
-        super().__init__(outcomes=["F", "R"])
+        super().__init__(["F", "R", "G"])
         self.counter = 0
 
     def execute(self, blackboard):
-        print("Executing state GLOBAL")
+        print("Executing state Global")
 
         if countObs == 0:
             return "R"
         elif readyStart == True:
             return "F"
+        else:
+            return "G"
 
-# define state Follow
 class FollowState(yState):
     def __init__(self):
-        super().__init__(outcomes=["OI", "OO", "G", "R"])
+        super().__init__(["OI", "OO", "G", "R","F"])
+        
 
     def execute(self, blackboard):
-        print("Executing state FOLLOW")
+        print("Executing state Follow")
 
         if di <= d0:
             return "OI"
@@ -161,29 +176,40 @@ class FollowState(yState):
             return "G"
         elif readyStart == True:
             return "R"
+        else: 
+            return "F"
 
-# define state OI
 class OIState(yState):
     def __init__(self):
-        super().__init__(outcomes=["G", "R"])
+        super().__init__(["G", "R", "OI"])
+        self.counter = 0
 
     def execute(self, blackboard):
-        print("Executing state OVERTAKE INSIDE")
+        print("Executing state OI")
 
-        print(blackboard.foo_str)
-        return "outcome3"
+        if countObs == 0:
+            return "G"
+        elif readyStart == True:
+            return "R"
+        else:
+            return "OI"
 
-# define state OO
 class OOState(yState):
     def __init__(self):
-        super().__init__(outcomes=["G", "R"])
+        super().__init__(["G", "R", "OO"])
+        self.counter = 0
 
     def execute(self, blackboard):
-        print("Executing state OVERTAKE OUTSIDE")
+        print("Executing state OO")
 
-        print(blackboard.foo_str)
-        return "outcome3"
-    
+        if countObs == 0:
+            return "G"
+        elif readyStart == True:
+            return "R"
+        else:
+            return "OO"
+
+
 class fsmNode(Node):
 
     def __init__(self):
@@ -194,20 +220,27 @@ class fsmNode(Node):
 
         # add states
         sm.add_state("READY", ReadyState(),
-                     transitions={"G": "GLOBAL"})
-        sm.add_state("GLOBAL", GlobalState(),
-                     transitions={"F": "FOLLOW",
+                     transitions={"G": "GLOBAL",
                                   "R": "READY"})
+        sm.add_state("GLOBAL", GlobalState(),
+                     transitions={"R": "READY",
+                                  "F": "FOLLOW",
+                                  "G": "GLOBAL"})
         sm.add_state("FOLLOW", FollowState(),
                      transitions={"OI": "OVERTAKE INSIDE",
-                                  "OO": "OVERTAKE OUTSIDE"})
+                                  "OO": "OVERTAKE INSIDE",
+                                  "G": "GLOBAL",
+                                  "R": "READY",
+                                  "F": "FOLLOW"})
 
         sm.add_state("OVERTAKE INSIDE", OIState(),
                      transitions={"G": "GLOBAL",
-                                  "R": "READY"})
+                                  "R": "READY",
+                                  "OI": "OVERTAKE INSIDE"})
         sm.add_state("OVERTAKE OUTSIDE", OOState(),
                      transitions={"G": "GLOBAL",
-                                  "R": "READY"})
+                                  "R": "READY",
+                                  "OO": "OVERTAKE OUTSIDE"})
 
 
         # pub
@@ -217,12 +250,6 @@ class fsmNode(Node):
         outcome = sm()
         print(outcome)
 
-class Obstacle():
-
-    def __init__(self):
-        self.pose = 0
-        self.di = 0
-        self.d0 = 0
 
 def main(args=None):
     rclpy.init(args=args)
