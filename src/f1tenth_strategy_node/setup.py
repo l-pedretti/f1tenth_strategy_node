@@ -20,10 +20,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
             'console_scripts': [
-                    'obstacle = f1tenth_strategy_node.publisher_obstacle:main',
-                    'car = f1tenth_strategy_node.publisher_car:main',
-                    'fsm = f1tenth_strategy_node.subscriber_fsm:main',
-                    'fsm_reader = f1tenth_strategy_node.sub_fsm:main',
+                    'pub_obstacle = f1tenth_strategy_node.publisher_obstacle:main',
+                    'pub_car = f1tenth_strategy_node.publisher_car:main',
+                    'fsm = f1tenth_strategy_node.fsm:main',
+                    'sub_fsm = f1tenth_strategy_node.sub_fsm:main',
             ],
     },
 )
