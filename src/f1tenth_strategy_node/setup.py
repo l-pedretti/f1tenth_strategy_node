@@ -23,6 +23,7 @@ setup(
                     'obstacle = f1tenth_strategy_node.publisher_obstacle:main',
                     'car = f1tenth_strategy_node.publisher_car:main',
                     'fsm = f1tenth_strategy_node.subscriber_fsm:main',
+                    'fsm_reader = f1tenth_strategy_node.sub_fsm:main',
             ],
     },
 )

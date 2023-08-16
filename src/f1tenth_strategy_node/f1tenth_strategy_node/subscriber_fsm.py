@@ -28,6 +28,7 @@ from lifecycle_msgs.msg import Transition
 
 globalStart = False
 readyStart = False
+current_fsm_state = ''
 countObs = 0
 di = 0
 d0 = 0 
@@ -39,9 +40,6 @@ class LifecycleTalker (LifecycleNode):
     def __init__(self):
         super().__init__("lc_talker")
         self.pubcount = 0
-        self.obstacle_subscriber = 0
-        self.obstacle_car = 0
-        self.fsm_node =  0
         self.declare_parameter('dth', 0)
         
     def on_configure(self):
@@ -74,11 +72,15 @@ class LifecycleTalker (LifecycleNode):
         executor = MultiThreadedExecutor()
         self.obstacle_subscriber = ObstacleSubscriber()
         self.car_subscriber = CarSubscriber()
-        self.fsm_node = fsmNode()
+        self.fsm_publisher = FsmPublisher()
+        self.fsm_node = FsmNode()
+
 
         executor.add_node(self.obstacle_subscriber)
         executor.add_node(self.car_subscriber)
+        executor.add_node(self.fsm_publisher)
         executor.add_node(self.fsm_node)
+
         executor.spin()
         return Transition.TRANSITION_CALLBACK_SUCCESS
     
@@ -86,7 +88,8 @@ class LifecycleTalker (LifecycleNode):
         self.get_logger().info("on_deactivate() is called")
         self.obstacle_subscriber.destroy_node()
         self.car_subscriber.destroy_node()
-        self.fsm_node.destoy_node()
+        self.fsm_node.destroy_node()
+        self.fsm_publisher.destroy_node()
         return Transition.TRANSITION_CALLBACK_SUCCESS
 
     def publish_callback(self):
@@ -124,6 +127,23 @@ class CarSubscriber(Node):
     def listener_callback(self, msg):
         self.get_logger().info('I heard: "%s"' % msg)
 
+class FsmPublisher(Node):
+
+    def __init__(self):
+        super().__init__('fsm_publisher')
+        self.publisher_ = self.create_publisher(String, 'fsm_state', 10)
+        timer_period = 0.1  
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        print("Executing publisher")
+
+    def timer_callback(self):
+        print("Sending publisher")
+        msg = String()
+        msg.data = current_fsm_state
+        self.publisher_.publish(msg)
+        self.get_logger().info('Publishing: "%s"' % msg.data)
+
+
 
 class Obstacle():
 
@@ -135,10 +155,12 @@ class Obstacle():
 class ReadyState(yState):
     def __init__(self):
         super().__init__(["G","R"])
-
+        
     def execute(self, blackboard):
         print("Executing state Ready")
-
+        time.sleep(3)
+        global current_fsm_state
+        current_fsm_state = 'R'
         if globalStart == True:
             return "G"
         else:
@@ -152,6 +174,9 @@ class GlobalState(yState):
 
     def execute(self, blackboard):
         print("Executing state Global")
+        time.sleep(3)
+        global current_fsm_state
+        current_fsm_state = 'G'
 
         if countObs == 0:
             return "R"
@@ -167,6 +192,9 @@ class FollowState(yState):
 
     def execute(self, blackboard):
         print("Executing state Follow")
+        time.sleep(3)
+        global current_fsm_state
+        current_fsm_state = 'F'
 
         if di <= d0:
             return "OI"
@@ -186,6 +214,9 @@ class OIState(yState):
 
     def execute(self, blackboard):
         print("Executing state OI")
+        time.sleep(3)
+        global current_fsm_state
+        current_fsm_state = 'OI'
 
         if countObs == 0:
             return "G"
@@ -201,6 +232,9 @@ class OOState(yState):
 
     def execute(self, blackboard):
         print("Executing state OO")
+        time.sleep(3)
+        global current_fsm_state
+        current_fsm_state = 'OO'
 
         if countObs == 0:
             return "G"
@@ -210,7 +244,7 @@ class OOState(yState):
             return "OO"
 
 
-class fsmNode(Node):
+class FsmNode(Node):
 
     def __init__(self):
         super().__init__("fsm_node")
