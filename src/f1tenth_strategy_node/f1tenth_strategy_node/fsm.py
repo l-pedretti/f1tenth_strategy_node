@@ -27,6 +27,7 @@ from lifecycle_msgs.msg import State as lState
 from lifecycle_msgs.msg import Transition
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 from tutorial_interfaces.srv import ChangeState
+import threading
 globalStart = False
 readyStart = False
 current_fsm_state = ''
@@ -45,16 +46,18 @@ class LifecycleTalker (LifecycleNode):
        
         self.srv = self.create_service(ChangeState, 'fsm_changeState', self.fsm_changeState_callback)
 
-    def fsm_changeState_callback(self, request):
-        if request == 'R':
+    def fsm_changeState_callback(self, request, response):
+        if request.state == 'R':
             global readyStart
             readyStart = True
-        elif request == 'G':
+        elif request.state == 'G':
             global globalStart
             globalStart = True
         self.get_logger().info('Incoming request for fsm state change\n')
+        
+        response.response = 'state changed'
 
-        return 'state changed'
+        return response
     
     def on_configure(self):
         self.pub = self.create_publisher(String, "lifecycle_chatter", 10)
@@ -87,13 +90,19 @@ class LifecycleTalker (LifecycleNode):
         self.obstacle_subscriber = ObstacleSubscriber()
         self.car_subscriber = CarSubscriber()
         self.fsm_publisher = FsmPublisher()
-        self.fsm_node = FsmNode()
-        executor.add_node(self.fsm_node)
+
         executor.add_node(self.obstacle_subscriber)
         executor.add_node(self.car_subscriber)
         executor.add_node(self.fsm_publisher)
-        
-        executor.spin()
+
+        t1 = threading.Thread(target = executor.spin)
+        t1.start()
+
+        self.fsm_node = FsmNode
+        t2 = threading.Thread(target = self.fsm_node)
+        t2.start()
+
+
         return Transition.TRANSITION_CALLBACK_SUCCESS
     
     def on_deactivate(self):
@@ -151,16 +160,12 @@ class FsmPublisher(Node):
         self.publisher_ = self.create_publisher(String, 'fsm_state', 10, callback_group=client_cb_group)
         timer_period = 1  
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        print("Executing publisher")
 
     def timer_callback(self):
-        print("Sending publisher")
         msg = String()
         msg.data = current_fsm_state
         self.publisher_.publish(msg)
         self.get_logger().info('Publishing: "%s"' % msg.data)
-
-
 
 class Obstacle():
 
@@ -183,7 +188,6 @@ class ReadyState(yState):
         else:
             return "R"
     
-
 class GlobalState(yState):
     def __init__(self):
         super().__init__(["F", "R", "G"])
@@ -206,7 +210,6 @@ class FollowState(yState):
     def __init__(self):
         super().__init__(["OI", "OO", "G", "R","F"])
         
-
     def execute(self, blackboard):
         print("Executing state Follow")
         time.sleep(3)
@@ -309,7 +312,7 @@ def main(args=None):
     obsList.append(o)
     
     lifecycle_talker = LifecycleTalker()
-    
+
     rclpy.spin(lifecycle_talker)
 
     rclpy.shutdown()
