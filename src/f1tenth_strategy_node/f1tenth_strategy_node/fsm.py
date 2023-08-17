@@ -21,11 +21,12 @@ from yasmin import State as yState
 from yasmin import StateMachine
 from yasmin_viewer import YasminViewerPub
 from nav_msgs.msg import Odometry
-from rclpy.executors import MultiThreadedExecutor
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 from f1tenth_strategy_node.lifecycle import LifecycleNode
 from lifecycle_msgs.msg import State as lState
 from lifecycle_msgs.msg import Transition
-
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from tutorial_interfaces.srv import ChangeState
 globalStart = False
 readyStart = False
 current_fsm_state = ''
@@ -41,7 +42,20 @@ class LifecycleTalker (LifecycleNode):
         super().__init__("lc_talker")
         self.pubcount = 0
         self.declare_parameter('dth', 0)
-        
+       
+        self.srv = self.create_service(ChangeState, 'fsm_changeState', self.fsm_changeState_callback)
+
+    def fsm_changeState_callback(self, request):
+        if request == 'R':
+            global readyStart
+            readyStart = True
+        elif request == 'G':
+            global globalStart
+            globalStart = True
+        self.get_logger().info('Incoming request for fsm state change\n')
+
+        return 'state changed'
+    
     def on_configure(self):
         self.pub = self.create_publisher(String, "lifecycle_chatter", 10)
         self.get_logger().info("on_configure() is called")
@@ -74,13 +88,11 @@ class LifecycleTalker (LifecycleNode):
         self.car_subscriber = CarSubscriber()
         self.fsm_publisher = FsmPublisher()
         self.fsm_node = FsmNode()
-
-
+        executor.add_node(self.fsm_node)
         executor.add_node(self.obstacle_subscriber)
         executor.add_node(self.car_subscriber)
         executor.add_node(self.fsm_publisher)
-        executor.add_node(self.fsm_node)
-
+        
         executor.spin()
         return Transition.TRANSITION_CALLBACK_SUCCESS
     
@@ -103,13 +115,15 @@ class ObstacleSubscriber(Node):
 
     def __init__(self):
         super().__init__('obstacle_subscriber')
+        client_cb_group = MutuallyExclusiveCallbackGroup()
         self.subscription = self.create_subscription(
             PoseArray,
             'obstacle',
             self.listener_callback,
-            10)
+            10,
+            callback_group=client_cb_group)
         self.subscription  # prevent unused variable warning
-
+        
     def listener_callback(self, msg):
         self.get_logger().info('I heard: "%s"' % msg)
 
@@ -117,11 +131,13 @@ class CarSubscriber(Node):
 
     def __init__(self):
         super().__init__('car_subscriber')
+        client_cb_group = MutuallyExclusiveCallbackGroup()
         self.subscription = self.create_subscription(
             Odometry,
             'car',
             self.listener_callback,
-            10)
+            10,
+            callback_group=client_cb_group)
         self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
@@ -131,8 +147,9 @@ class FsmPublisher(Node):
 
     def __init__(self):
         super().__init__('fsm_publisher')
-        self.publisher_ = self.create_publisher(String, 'fsm_state', 10)
-        timer_period = 0.1  
+        client_cb_group = MutuallyExclusiveCallbackGroup()
+        self.publisher_ = self.create_publisher(String, 'fsm_state', 10, callback_group=client_cb_group)
+        timer_period = 1  
         self.timer = self.create_timer(timer_period, self.timer_callback)
         print("Executing publisher")
 

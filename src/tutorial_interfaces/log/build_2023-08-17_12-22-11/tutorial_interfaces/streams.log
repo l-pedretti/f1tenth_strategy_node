@@ -1,0 +1,44 @@
+[0.022s] Invoking command in '/home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy:/home/giulia/Desktop/project/install/f1tenth_strategy_node /usr/bin/cmake /home/giulia/Desktop/project/src/tutorial_interfaces -DCMAKE_INSTALL_PREFIX=/home/giulia/Desktop/project/src/tutorial_interfaces/install/tutorial_interfaces
+[0.184s] -- The C compiler identification is GNU 9.4.0
+[0.308s] -- The CXX compiler identification is GNU 9.4.0
+[0.317s] -- Check for working C compiler: /usr/bin/cc
+[0.431s] -- Check for working C compiler: /usr/bin/cc -- works
+[0.431s] -- Detecting C compiler ABI info
+[0.640s] -- Detecting C compiler ABI info - done
+[0.657s] -- Detecting C compile features
+[0.657s] -- Detecting C compile features - done
+[0.662s] -- Check for working CXX compiler: /usr/bin/c++
+[0.776s] -- Check for working CXX compiler: /usr/bin/c++ -- works
+[0.777s] -- Detecting CXX compiler ABI info
+[0.893s] -- Detecting CXX compiler ABI info - done
+[0.915s] -- Detecting CXX compile features
+[0.916s] -- Detecting CXX compile features - done
+[0.921s] -- Found ament_cmake: 0.9.12 (/opt/ros/foxy/share/ament_cmake/cmake)
+[0.999s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.8.10", minimum required is "3") 
+[0.999s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[1.417s] -- Found ament_lint_auto: 0.9.8 (/opt/ros/foxy/share/ament_lint_auto/cmake)
+[1.586s] -- Added test 'copyright' to check source files copyright and LICENSE
+[1.593s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[1.593s] -- Configured cppcheck include dirs: 
+[1.593s] -- Configured cppcheck exclude dirs and/or files: 
+[1.601s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[1.601s] -- Configured cpplint exclude dirs and/or files: 
+[1.605s] -- Added test 'lint_cmake' to check CMake code style
+[1.613s] -- Added test 'uncrustify' to check C / C++ code style
+[1.613s] -- Configured uncrustify additional arguments: 
+[1.616s] -- Added test 'xmllint' to check XML markup files
+[1.623s] -- Found rosidl_default_generators: 1.0.1 (/opt/ros/foxy/share/rosidl_default_generators/cmake)
+[1.633s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.648s] -- Found rosidl_adapter: 1.3.1 (/opt/ros/foxy/share/rosidl_adapter/cmake)
+[1.836s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "1.1.1f")  
+[1.874s] -- Found FastRTPS: /opt/ros/foxy/include  
+[1.985s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[2.031s] CMake Error at /opt/ros/foxy/share/rosidl_cmake/cmake/rosidl_generate_interfaces.cmake:64 (message):
+[2.032s]   rosidl_generate_interfaces() must be called before ament_package()
+[2.032s] Call Stack (most recent call first):
+[2.032s]   CMakeLists.txt:39 (rosidl_generate_interfaces)
+[2.032s] 
+[2.032s] 
+[2.034s] -- Configuring incomplete, errors occurred!
+[2.034s] See also "/home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces/CMakeFiles/CMakeOutput.log".
+[2.041s] Invoked command in '/home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy:/home/giulia/Desktop/project/install/f1tenth_strategy_node /usr/bin/cmake /home/giulia/Desktop/project/src/tutorial_interfaces -DCMAKE_INSTALL_PREFIX=/home/giulia/Desktop/project/src/tutorial_interfaces/install/tutorial_interfaces

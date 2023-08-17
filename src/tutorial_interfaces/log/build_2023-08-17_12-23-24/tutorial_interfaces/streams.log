@@ -1,0 +1,52 @@
+[0.021s] Invoking command in '/home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy:/home/giulia/Desktop/project/install/f1tenth_strategy_node /usr/bin/cmake /home/giulia/Desktop/project/src/tutorial_interfaces -DCMAKE_INSTALL_PREFIX=/home/giulia/Desktop/project/src/tutorial_interfaces/install/tutorial_interfaces
+[0.046s] -- Found ament_cmake: 0.9.12 (/opt/ros/foxy/share/ament_cmake/cmake)
+[0.081s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[0.342s] -- Found rosidl_default_generators: 1.0.1 (/opt/ros/foxy/share/rosidl_default_generators/cmake)
+[0.346s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.351s] -- Found rosidl_adapter: 1.3.1 (/opt/ros/foxy/share/rosidl_adapter/cmake)
+[0.593s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.664s] -- Found PythonInterp: /usr/bin/python3 (found version "3.8.10") 
+[0.947s] CMake Error at /opt/ros/foxy/share/rosidl_adapter/cmake/rosidl_adapt_interfaces.cmake:60 (message):
+[0.947s]   execute_process(/usr/bin/python3 -m rosidl_adapter --package-name
+[0.947s]   tutorial_interfaces --arguments-file
+[0.947s]   /home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces/rosidl_adapter__arguments__tutorial_interfaces.json
+[0.947s]   --output-dir
+[0.947s]   /home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces/rosidl_adapter/tutorial_interfaces
+[0.948s]   --output-file
+[0.948s]   /home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces/rosidl_adapter/tutorial_interfaces.idls)
+[0.948s]   returned error code 1:
+[0.948s] 
+[0.948s]   Traceback (most recent call last):
+[0.948s] 
+[0.949s]     File "/usr/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+[0.949s]       return _run_code(code, main_globals, None,
+[0.949s]     File "/usr/lib/python3.8/runpy.py", line 87, in _run_code
+[0.949s]       exec(code, run_globals)
+[0.949s]     File "/opt/ros/foxy/lib/python3.8/site-packages/rosidl_adapter/__main__.py", line 19, in <module>
+[0.949s]       sys.exit(main())
+[0.950s]     File "/opt/ros/foxy/lib/python3.8/site-packages/rosidl_adapter/main.py", line 53, in main
+[0.950s]       abs_idl_file = convert_to_idl(
+[0.950s]     File "/opt/ros/foxy/lib/python3.8/site-packages/rosidl_adapter/__init__.py", line 24, in convert_to_idl
+[0.950s]       return convert_srv_to_idl(
+[0.951s]     File "/opt/ros/foxy/lib/python3.8/site-packages/rosidl_adapter/srv/__init__.py", line 28, in convert_srv_to_idl
+[0.951s]       srv = parse_service_string(package_name, input_file.stem, content)
+[0.951s]     File "/opt/ros/foxy/lib/python3.8/site-packages/rosidl_adapter/parser.py", line 852, in parse_service_string
+[0.951s]       request_message = parse_message_string(
+[0.951s]     File "/opt/ros/foxy/lib/python3.8/site-packages/rosidl_adapter/parser.py", line 540, in parse_message_string
+[0.951s]       msg = MessageSpecification(pkg_name, msg_name, fields, constants)
+[0.951s]     File "/opt/ros/foxy/lib/python3.8/site-packages/rosidl_adapter/parser.py", line 387, in __init__
+[0.952s]       self.base_type = BaseType(
+[0.952s]     File "/opt/ros/foxy/lib/python3.8/site-packages/rosidl_adapter/parser.py", line 204, in __init__
+[0.952s]       raise InvalidResourceName(
+[0.952s] 
+[0.953s]   rosidl_adapter.parser.InvalidResourceName: 'fsm_changeState_Request' is an
+[0.953s]   invalid message name.  It should have the pattern '^[A-Z][A-Za-z0-9]*$'
+[0.953s] 
+[0.953s] Call Stack (most recent call first):
+[0.953s]   /opt/ros/foxy/share/rosidl_cmake/cmake/rosidl_generate_interfaces.cmake:130 (rosidl_adapt_interfaces)
+[0.953s]   CMakeLists.txt:26 (rosidl_generate_interfaces)
+[0.953s] 
+[0.953s] 
+[0.954s] -- Configuring incomplete, errors occurred!
+[0.954s] See also "/home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces/CMakeFiles/CMakeOutput.log".
+[0.959s] Invoked command in '/home/giulia/Desktop/project/src/tutorial_interfaces/build/tutorial_interfaces' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy:/home/giulia/Desktop/project/install/f1tenth_strategy_node /usr/bin/cmake /home/giulia/Desktop/project/src/tutorial_interfaces -DCMAKE_INSTALL_PREFIX=/home/giulia/Desktop/project/src/tutorial_interfaces/install/tutorial_interfaces
