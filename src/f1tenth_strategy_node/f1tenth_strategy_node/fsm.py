@@ -28,12 +28,13 @@ from lifecycle_msgs.msg import Transition
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 from tutorial_interfaces.srv import ChangeState
 import threading
+import random 
+
 globalStart = False
 readyStart = False
 current_fsm_state = ''
 countObs = 0
-di = 0
-d0 = 0 
+carPos = 0
 minL = 0
 obsList = []
 
@@ -60,15 +61,14 @@ class LifecycleTalker (LifecycleNode):
         return response
     
     def on_configure(self):
-        self.pub = self.create_publisher(String, "lifecycle_chatter", 10)
         self.get_logger().info("on_configure() is called")
-        self.create_timer(1.0, self.publish_callback)
         dth = rclpy.parameter.Parameter(
             'dth',
             rclpy.Parameter.Type.INTEGER,
             0
         )
         parameters = [dth]
+        #DA SISTEMARE
         self.set_parameters(parameters)
         return Transition.TRANSITION_CALLBACK_SUCCESS
     
@@ -113,12 +113,6 @@ class LifecycleTalker (LifecycleNode):
         self.fsm_publisher.destroy_node()
         return Transition.TRANSITION_CALLBACK_SUCCESS
 
-    def publish_callback(self):
-        if(self.state == lState.PRIMARY_STATE_ACTIVE):
-            self.pubcount += 1
-            self.pub.publish(String(data = "Lifecycle (Python) Hello World #" + str(self.pubcount)))
-
-
 
 class ObstacleSubscriber(Node):
 
@@ -134,7 +128,18 @@ class ObstacleSubscriber(Node):
         self.subscription  # prevent unused variable warning
         
     def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg)
+        #self.get_logger().info('I heard: "%s"' % msg)
+        global obsList, countObs
+        obsList = []
+        countObs = 0
+        for pose in msg.poses:
+            di = random.randint(0,100)
+            d0 = random.randint(0,100)
+            obs = Obstacle(pose, di, d0)
+            obsList.append(obs)
+            countObs+=1
+            print(pose)
+
 
 class CarSubscriber(Node):
 
@@ -150,7 +155,10 @@ class CarSubscriber(Node):
         self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg)
+        #self.get_logger().info('I heard: "%s"' % msg)
+        global carPos 
+        carPos = msg.pose.pose
+        print(carPos)
 
 class FsmPublisher(Node):
 
@@ -169,21 +177,24 @@ class FsmPublisher(Node):
 
 class Obstacle():
 
-    def __init__(self):
-        self.pose = 0
-        self.di = 0
-        self.d0 = 0
+    def __init__(self, pose, di, d0):
+        self.pose = pose
+        self.di = di
+        self.d0 = d0
 
 class ReadyState(yState):
     def __init__(self):
         super().__init__(["G","R"])
         
     def execute(self, blackboard):
-        print("Executing state Ready")
-        time.sleep(3)
         global current_fsm_state
+        if current_fsm_state != 'R':
+            print("Executing state Ready")
+        time.sleep(3)
+        global globalStart 
         current_fsm_state = 'R'
         if globalStart == True:
+            globalStart = False
             return "G"
         else:
             return "R"
@@ -194,15 +205,19 @@ class GlobalState(yState):
         self.counter = 0
 
     def execute(self, blackboard):
-        print("Executing state Global")
-        time.sleep(3)
         global current_fsm_state
+        if current_fsm_state != 'G':
+            print("Executing state Global")
+        time.sleep(3)
+        global readyStart
         current_fsm_state = 'G'
-
-        if countObs == 0:
+        countObs = 5
+        if readyStart == True:
+            readyStart = False
             return "R"
-        elif readyStart == True:
+        elif countObs != 0:
             return "F"
+
         else:
             return "G"
 
@@ -211,19 +226,21 @@ class FollowState(yState):
         super().__init__(["OI", "OO", "G", "R","F"])
         
     def execute(self, blackboard):
-        print("Executing state Follow")
-        time.sleep(3)
         global current_fsm_state
+        if current_fsm_state != 'F':
+            print("Executing state Follow")
+        time.sleep(3)
         current_fsm_state = 'F'
-
-        if di <= d0:
+        global readyStart
+        if readyStart == True:
+            readyStart = False
+            return "R"
+        elif di <= d0:
             return "OI"
         elif d0 < di:
             return "OO"
         elif countObs == 0:
             return "G"
-        elif readyStart == True:
-            return "R"
         else: 
             return "F"
 
@@ -233,15 +250,17 @@ class OIState(yState):
         self.counter = 0
 
     def execute(self, blackboard):
-        print("Executing state OI")
-        time.sleep(3)
         global current_fsm_state
+        if current_fsm_state != 'OI':
+            print("Executing state OI")
+        time.sleep(3)
+        global readyStart
         current_fsm_state = 'OI'
-
-        if countObs == 0:
-            return "G"
-        elif readyStart == True:
+        if readyStart == True:
+            readyStart = False
             return "R"
+        elif countObs == 0:
+            return "G"
         else:
             return "OI"
 
@@ -251,15 +270,17 @@ class OOState(yState):
         self.counter = 0
 
     def execute(self, blackboard):
-        print("Executing state OO")
-        time.sleep(3)
         global current_fsm_state
+        if current_fsm_state != 'OO':
+            print("Executing state OO")
+        time.sleep(3)
+        global readyStart
         current_fsm_state = 'OO'
-
-        if countObs == 0:
-            return "G"
-        elif readyStart == True:
+        if readyStart == True:
+            readyStart = False
             return "R"
+        elif countObs == 0:
+            return "G"
         else:
             return "OO"
 
@@ -308,8 +329,6 @@ class FsmNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     
-    o = Obstacle()
-    obsList.append(o)
     
     lifecycle_talker = LifecycleTalker()
 

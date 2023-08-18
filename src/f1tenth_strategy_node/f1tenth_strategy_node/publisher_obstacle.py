@@ -10,7 +10,7 @@ class ObstaclePublisher(Node):
     def __init__(self):
         super().__init__('obstacle_publisher')
         self.publisher_ = self.create_publisher(PoseArray, 'obstacle', 10)
-        timer_period = 0.1
+        timer_period = 10
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
         self.deg = 0

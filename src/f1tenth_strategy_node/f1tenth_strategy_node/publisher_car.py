@@ -11,7 +11,7 @@ class CarPublisher(Node):
         def __init__(self):
             super().__init__('car_publisher')
             self.publisher_ = self.create_publisher(Odometry, 'car', 10)
-            timer_period = 0.1
+            timer_period = 10
             self.timer = self.create_timer(timer_period, self.timer_callback)
             self.deg = 0
         def timer_callback(self):
