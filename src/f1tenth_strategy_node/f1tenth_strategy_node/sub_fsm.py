@@ -15,19 +15,18 @@ class FsmSubscriber(Node):
         self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.data)
+        self.get_logger().info('Current FSM state: "%s"' % msg.data)
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     fsm_subscriber = FsmSubscriber()
+    try:
+        rclpy.spin(fsm_subscriber)
+    except KeyboardInterrupt:
+        print('\n Interrupted')
 
-    rclpy.spin(fsm_subscriber)
-
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
     fsm_subscriber.destroy_node()
     rclpy.shutdown()
 

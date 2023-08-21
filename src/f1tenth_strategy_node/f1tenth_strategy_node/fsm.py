@@ -29,34 +29,37 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallb
 from tutorial_interfaces.srv import ChangeState
 import threading
 import random 
-from threading import Lock
+import math 
 
-globalStart = False
-readyStart = False
+globalSwitch = False
+readySwitch = False
+shutdown = False
 current_fsm_state = ''
 countObs = 0
-carPos = 0
+dth = 0.0
+carPos = Pose()
 obsList = []
-lock = Lock()
+tNc = 0.0
+lock = threading.Lock()
 
 
 class LifecycleTalker (LifecycleNode):
     def __init__(self):
         super().__init__("lc_talker")
-        self.declare_parameter("dth", 0)
-        
+        self.declare_parameter("dth", 3.0)
+        self.declare_parameter("tnc", 5.0)
         self.srv = self.create_service(ChangeState, 'fsm_changeState', self.fsm_changeState_callback)
 
     def fsm_changeState_callback(self, request, response):
+        self.get_logger().info('Incoming request for fsm state change')
         lock.acquire()
         if request.state == 'R':
-            global readyStart
-            readyStart = True
+            global readySwitch
+            readySwitch = True
         elif request.state == 'G':
-            global globalStart
-            globalStart = True
+            global globalSwitch
+            globalSwitch = True
         lock.release()    
-        self.get_logger().info('Incoming request for fsm state change\n')
         
         response.response = 'state changed'
         
@@ -66,22 +69,26 @@ class LifecycleTalker (LifecycleNode):
         self.get_logger().info("on_configure() is called")
         lock.acquire()
         global dth
-        dth = self.get_parameter("dth").get_parameter_value().integer_value
+        dth = self.get_parameter("dth").get_parameter_value().double_value
+        global tNc
+        tNc = self.get_parameter("tnc").get_parameter_value().double_value
         lock.release() 
         return Transition.TRANSITION_CALLBACK_SUCCESS
     
     def on_cleanup(self):
         self.get_logger().info("on_cleanup() is called")
         lock.acquire()
-        global globalStart, readyStart, countObs, dth, obsList, globalStart, current_fsm_state, carPos 
-        globalStart = False
-        readyStart = False
+        global globalSwitch, readySwitch, countObs, dth, tNc, obsList, current_fsm_state, carPos, shutdown
+        globalSwitch = False
+        readySwitch = False
+        shutdown = False
         countObs = 0
-        dth = 0 
+        dth = 0.0
+        tNc = 0.0 
         obsList = []
-        globalStart = False
+        globalSwitch = False
         current_fsm_state = ''
-        carPos = 0 
+        carPos = Pose() 
         lock.release() 
         return Transition.TRANSITION_CALLBACK_SUCCESS
     
@@ -100,8 +107,8 @@ class LifecycleTalker (LifecycleNode):
         self.t1 = threading.Thread(target = executor.spin)
         self.t1.start()
 
-        self.fsm_node = FsmNode
-        self.t2 = threading.Thread(target = self.fsm_node)
+        self.fsm_node = FsmNode()
+        self.t2 = threading.Thread(target = self.fsm_node.execute)
         self.t2.start()
 
 
@@ -110,12 +117,16 @@ class LifecycleTalker (LifecycleNode):
     def on_deactivate(self):
        
         self.get_logger().info("on_deactivate() is called")
-        # implementare lo stop dei thread
-        
-        self.obstacle_subscriber.destroy_node()
-        self.car_subscriber.destroy_node()
-        self.fsm_node.destroy_node()
-        self.fsm_publisher.destroy_node()
+        if (current_fsm_state == 'R'):
+            global shutdown 
+            shutdown = True
+            self.obstacle_subscriber.destroy_node()
+            self.car_subscriber.destroy_node()
+            self.fsm_node.destroy_node()
+            self.fsm_publisher.destroy_node()
+        else:
+            print("FSM must be in READY state to call shutdown!")
+
         return Transition.TRANSITION_CALLBACK_SUCCESS
 
 
@@ -143,7 +154,6 @@ class ObstacleSubscriber(Node):
             obs = Obstacle(pose, di, d0)
             obsList.append(obs)
             countObs+=1
-            print(pose)
 
 
 class CarSubscriber(Node):
@@ -160,12 +170,11 @@ class CarSubscriber(Node):
         self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
+        #self.get_logger().info('I heard: "%s"' % msg)
         lock.acquire()
         global carPos 
         carPos = msg.pose.pose
         lock.release()
-        
-        print(carPos)
 
 class FsmPublisher(Node):
 
@@ -173,14 +182,13 @@ class FsmPublisher(Node):
         super().__init__('fsm_publisher')
         client_cb_group = MutuallyExclusiveCallbackGroup()
         self.publisher_ = self.create_publisher(String, 'fsm_state', 10, callback_group=client_cb_group)
-        timer_period = 1  
+        timer_period = 0.5 
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def timer_callback(self):
         msg = String()
         msg.data = current_fsm_state
         self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
 
 class Obstacle():
 
@@ -191,7 +199,7 @@ class Obstacle():
 
 class ReadyState(yState):
     def __init__(self):
-        super().__init__(["G","R"])
+        super().__init__(["S","G","R"])
         
     def execute(self, blackboard):
         lock.acquire()
@@ -199,15 +207,20 @@ class ReadyState(yState):
         if current_fsm_state != 'R':
             print("Executing state Ready")
        
-        global globalStart 
+        global globalSwitch, shutdown 
         current_fsm_state = 'R'
-        if globalStart == True:
-            globalStart = False
+        if shutdown == True:
+            shutdown == False
+            lock.release()
+            return "S"
+        elif globalSwitch == True:
+            globalSwitch = False
             lock.release()
             return "G"
         else:
             lock.release()
             return "R"
+        
             
 
 class GlobalState(yState):
@@ -222,44 +235,56 @@ class GlobalState(yState):
         
         if current_fsm_state != 'G':
             print("Executing state Global")
-        global readyStart
+        global readySwitch
         current_fsm_state = 'G'
-        countObs = 5
-        if readyStart == True:
-            readyStart = False
+
+        if readySwitch == True:
+            readySwitch = False
             lock.release()
             return "R"
         elif countObs != 0:
             lock.release()
             return "F"
-
         else:
             lock.release()
             return "G"
 
 class FollowState(yState):
     def __init__(self):
-        super().__init__(["OI", "OO", "G", "R","F"])
-        
+        super().__init__(["R", "OI", "OO", "G", "F"])
+        self.timer = 0
+
     def execute(self, blackboard):
         lock.acquire()
         global current_fsm_state
         if current_fsm_state != 'F':
+            self.timer = time.perf_counter()
             print("Executing state Follow")
     
         current_fsm_state = 'F'
-        global readyStart
-        if readyStart == True:
-            readyStart = False
+        global readySwitch
+
+        min_dist = 1000.0
+        min_obs = Obstacle(Pose(), 0, 0)
+        for obs in obsList:
+            obs_point = [obs.pose.position.x, obs.pose.position.y, obs.pose.position.z]
+            car_point = [carPos.position.x, carPos.position.y, carPos.position.z]
+            dist = math.dist(obs_point, car_point)
+            if (dist < dth) & (dist < min_dist):
+                min_obs = obs
+                min_dist = dist
+
+        if readySwitch == True:
+            readySwitch = False
             lock.release()
             return "R"
-        elif di <= d0:
+        elif min_obs.di <= min_obs.d0 and min_dist < 1000:
             lock.release()
             return "OI"
-        elif d0 < di:
+        elif min_obs.di > min_obs.d0 and min_dist < 1000:
             lock.release()
             return "OO"
-        elif countObs == 0:
+        elif countObs == 0 and self.timer > tNc:
             lock.release()
             return "G"
         else:
@@ -268,7 +293,7 @@ class FollowState(yState):
 
 class OIState(yState):
     def __init__(self):
-        super().__init__(["G", "R", "OI"])
+        super().__init__(["R", "G", "F", "OI"])
         self.counter = 0
 
     def execute(self, blackboard):
@@ -277,22 +302,34 @@ class OIState(yState):
         if current_fsm_state != 'OI':
             print("Executing state OI")
        
-        global readyStart
+        global readySwitch
         current_fsm_state = 'OI'
-        if readyStart == True:
-            readyStart = False
+
+        stop_overtaking = True
+        for obs in obsList:
+            obs_point = [obs.pose.position.x, obs.pose.position.y, obs.pose.position.z]
+            car_point = [carPos.position.x, carPos.position.y, carPos.position.z]
+            dist = math.dist(obs_point, car_point)
+            if (dist > dth):
+                stop_overtaking = False
+
+        if readySwitch == True:
+            readySwitch = False
             lock.release()
             return "R"
         elif countObs == 0:
             lock.release()
             return "G"
+        elif stop_overtaking == True:
+            lock.release()
+            return "F"
         else:
             lock.release()
             return "OI"
 
 class OOState(yState):
     def __init__(self):
-        super().__init__(["G", "R", "OO"])
+        super().__init__(["R", "G", "F", "OO"])
         self.counter = 0
 
     def execute(self, blackboard):
@@ -300,15 +337,28 @@ class OOState(yState):
         global current_fsm_state
         if current_fsm_state != 'OO':
             print("Executing state OO")
-        global readyStart
+
+        global readySwitch
         current_fsm_state = 'OO'
-        if readyStart == True:
-            readyStart = False
+
+        stop_overtaking = True
+        for obs in obsList:
+            obs_point = [obs.pose.position.x, obs.pose.position.y, obs.pose.position.z]
+            car_point = [carPos.position.x, carPos.position.y, carPos.position.z]
+            dist = math.dist(obs_point, car_point)
+            if (dist > dth):
+                stop_overtaking = False
+
+        if readySwitch == True:
+            readySwitch = False
             lock.release()
             return "R"
         elif countObs == 0:
             lock.release()
             return "G"
+        elif stop_overtaking == True:
+            lock.release()
+            return "F"
         else:
             lock.release()
             return "OO"
@@ -320,49 +370,56 @@ class FsmNode(Node):
         super().__init__("fsm_node")
 
         # create a state machine
-        sm = StateMachine(outcomes=["shutdown"])
+        self.sm = StateMachine(outcomes=["SHUTDOWN"])
 
         # add states
-        sm.add_state("READY", ReadyState(),
-                     transitions={"G": "GLOBAL",
+        self.sm.add_state("READY", ReadyState(),
+                     transitions={"S": "SHUTDOWN",
+                                  "G": "GLOBAL",
                                   "R": "READY"})
-        sm.add_state("GLOBAL", GlobalState(),
+        self.sm.add_state("GLOBAL", GlobalState(),
                      transitions={"R": "READY",
                                   "F": "FOLLOW",
                                   "G": "GLOBAL"})
-        sm.add_state("FOLLOW", FollowState(),
+        self.sm.add_state("FOLLOW", FollowState(),
                      transitions={"OI": "OVERTAKE INSIDE",
-                                  "OO": "OVERTAKE INSIDE",
+                                  "OO": "OVERTAKE OUTSIDE",
                                   "G": "GLOBAL",
                                   "R": "READY",
                                   "F": "FOLLOW"})
 
-        sm.add_state("OVERTAKE INSIDE", OIState(),
+        self.sm.add_state("OVERTAKE INSIDE", OIState(),
                      transitions={"G": "GLOBAL",
                                   "R": "READY",
+                                  "F": "FOLLOW",
                                   "OI": "OVERTAKE INSIDE"})
-        sm.add_state("OVERTAKE OUTSIDE", OOState(),
+        self.sm.add_state("OVERTAKE OUTSIDE", OOState(),
                      transitions={"G": "GLOBAL",
                                   "R": "READY",
+                                  "F": "FOLLOW",
                                   "OO": "OVERTAKE OUTSIDE"})
 
 
         # pub
-        YasminViewerPub(self, "strategy_fsm_node", sm)
+        YasminViewerPub(self, "strategy_fsm_node", self.sm)
 
-        # execute
-        outcome = sm()
+    # execute
+    def execute(self):
+        outcome = self.sm()
         print(outcome)
 
 
 def main(args=None):
+
     rclpy.init(args=args)
     
-    
     lifecycle_talker = LifecycleTalker()
+    try:
+        rclpy.spin(lifecycle_talker)
+    except KeyboardInterrupt:
+        print('\n Interrupted')
 
-    rclpy.spin(lifecycle_talker)
-
+    lifecycle_talker.destroy_node()
     rclpy.shutdown()
 
 
