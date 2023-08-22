@@ -12,9 +12,7 @@ from lifecycle_msgs.srv import GetAvailableStates
 from lifecycle_msgs.srv import GetAvailableTransitions
 from lifecycle_msgs.srv import GetState
 
-
 class LifecycleNode(Node):
-
     
     def __init__(self, node_name:str):
         super().__init__(node_name)

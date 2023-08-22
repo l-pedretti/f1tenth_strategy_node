@@ -4,9 +4,11 @@ from rclpy.node import Node
 from geometry_msgs.msg import Pose, PoseArray
 import random
 
+# sending simulated obstacles position values
 class ObstaclePublisher(Node):
 
     def __init__(self):
+        #creating obstacle publisher
         super().__init__('obstacle_publisher')
         self.publisher_ = self.create_publisher(PoseArray, 'obstacle', 10)
         timer_period = 0.5
@@ -14,10 +16,11 @@ class ObstaclePublisher(Node):
         self.poses = []
 
     def timer_callback(self):
+        #generating random number of obstacles 
         n = random.randint(0,5)
         for i in range(n):
+            #random values for obstacles position
             pose = Pose()
-
             pose.position.x = random.uniform(0.0,10.0)
             pose.position.y = random.uniform(0.0,10.0)
             pose.position.z = random.uniform(0.0,10.0)
@@ -41,10 +44,12 @@ def main(args=None):
 
     obstacle_publisher = ObstaclePublisher()
     try:
+        #initializing obstacle node
         rclpy.spin(obstacle_publisher)
+    #exception to avoid keyboard interrupt error
     except KeyboardInterrupt:
         print('\n Interrupted')
-
+    #destroying obstacle node
     obstacle_publisher.destroy_node()
     rclpy.shutdown()
 
