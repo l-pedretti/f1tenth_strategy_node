@@ -36,6 +36,10 @@ class LifecycleTalker (LifecycleNode):
         self.declare_parameter("dth", 3.0)
         self.declare_parameter("tnc", 5.0)
         self.srv = self.create_service(ChangeState, 'fsm_changeState', self.fsm_changeState_callback)
+        client_cb_group = MutuallyExclusiveCallbackGroup()
+        #creating the publisher
+        global publisher
+        publisher = self.create_publisher(String, 'fsm_state', 10, callback_group=client_cb_group)
     
     #change state callback 
     def fsm_changeState_callback(self, request, response):
@@ -99,11 +103,9 @@ class LifecycleTalker (LifecycleNode):
         executor = MultiThreadedExecutor()
         self.obstacle_subscriber = ObstacleSubscriber()
         self.car_subscriber = CarSubscriber()
-        self.fsm_publisher = FsmPublisher()
 
         executor.add_node(self.obstacle_subscriber)
         executor.add_node(self.car_subscriber)
-        executor.add_node(self.fsm_publisher)
         #splitting nodes in 2 threads to get them working in parallel
         self.t1 = threading.Thread(target = executor.spin)
         self.t1.start()
@@ -126,7 +128,6 @@ class LifecycleTalker (LifecycleNode):
             self.obstacle_subscriber.destroy_node()
             self.car_subscriber.destroy_node()
             self.fsm_node.destroy_node()
-            self.fsm_publisher.destroy_node()
         else:
             print("FSM must be in READY state to call shutdown!")
 
@@ -185,22 +186,6 @@ class CarSubscriber(Node):
         #mutex release
         lock.release()
 
-#CLASS FSM PUBLISHER: taking current fsm state and publishing it
-class FsmPublisher(Node):
-
-    def __init__(self):
-        super().__init__('fsm_publisher')
-        client_cb_group = MutuallyExclusiveCallbackGroup()
-        #creating the publisher
-        self.publisher_ = self.create_publisher(String, 'fsm_state', 10, callback_group=client_cb_group)
-        timer_period = 0.5 
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-
-    def timer_callback(self):
-        msg = String()
-        msg.data = current_fsm_state
-        self.publisher_.publish(msg)
-
 class Obstacle():
     #initializing attributes
     def __init__(self, pose, di, d0):
@@ -208,20 +193,27 @@ class Obstacle():
         self.di = di
         self.d0 = d0
 
+#callback to publish current fsm state
+def pub_callback():
+    msg = String()
+    msg.data = current_fsm_state
+    publisher.publish(msg)
+
 #CLASSES FOR EACH STATE: Ready, Global,Follow, Overtake Inside, Overstake Outside
 class ReadyState(yState):
     def __init__(self):
         super().__init__(["S","G","R"])
-        
+    
     def execute(self, blackboard):
+        global current_fsm_state, globalSwitch, shutdown
         #mutex acquire
         lock.acquire()
-        global current_fsm_state
         #controls across all possible cases
         if current_fsm_state != 'R':
+            current_fsm_state = 'R'
             print("Executing state Ready")
-        global globalSwitch, shutdown 
-        current_fsm_state = 'R'
+            pub_callback()
+        
         if shutdown == True:
             shutdown == False
             #mutex release
@@ -241,17 +233,16 @@ class ReadyState(yState):
 class GlobalState(yState):
     def __init__(self):
         super().__init__(["F", "R", "G"])
-        self.counter = 0
 
     def execute(self, blackboard):
-        global current_fsm_state
+        global current_fsm_state, readySwitch
         #mutex acquire
         lock.acquire()
         #controls across all possible cases
         if current_fsm_state != 'G':
+            current_fsm_state = 'G'
             print("Executing state Global")
-        global readySwitch
-        current_fsm_state = 'G'
+            pub_callback()
 
         if readySwitch == True:
             readySwitch = False
@@ -273,16 +264,15 @@ class FollowState(yState):
         self.timer = 0
 
     def execute(self, blackboard):
+        global current_fsm_state, readySwitch
         #mutex acquire
         lock.acquire()
-        global current_fsm_state
         #controls across all possible cases
         if current_fsm_state != 'F':
+            current_fsm_state = 'F'
             self.timer = time.perf_counter()
             print("Executing state Follow")
-    
-        current_fsm_state = 'F'
-        global readySwitch
+            pub_callback()
 
         min_dist = 1000.0
         min_obs = Obstacle(Pose(), 0, 0)
@@ -321,18 +311,17 @@ class FollowState(yState):
 class OIState(yState):
     def __init__(self):
         super().__init__(["R", "G", "F", "OI"])
-        self.counter = 0
 
     def execute(self, blackboard):
+        global current_fsm_state, readySwitch
         #mutex acquire
         lock.acquire()
-        global current_fsm_state
         #controls across all possible cases
         if current_fsm_state != 'OI':
+            current_fsm_state = 'OI'
             print("Executing state OI")
+            pub_callback()
        
-        global readySwitch
-        current_fsm_state = 'OI'
         #flag for stopping the overtaking
         stop_overtaking = True
         for obs in obsList:
@@ -340,7 +329,7 @@ class OIState(yState):
             car_point = [carPos.position.x, carPos.position.y, carPos.position.z]
             dist = math.dist(obs_point, car_point)
             #checking if the overstaking is finished
-            if (dist > dth):
+            if (dist < dth):
                 stop_overtaking = False
 
         if readySwitch == True:
@@ -364,18 +353,17 @@ class OIState(yState):
 class OOState(yState):
     def __init__(self):
         super().__init__(["R", "G", "F", "OO"])
-        self.counter = 0
 
     def execute(self, blackboard):
+        global current_fsm_state, readySwitch
         #mutex acquire
         lock.acquire()
-        global current_fsm_state
         #controls across all possible cases
         if current_fsm_state != 'OO':
+            current_fsm_state = 'OO'
             print("Executing state OO")
+            pub_callback()
 
-        global readySwitch
-        current_fsm_state = 'OO'
         #flag for stopping the overtaking
         stop_overtaking = True
         for obs in obsList:
@@ -383,7 +371,7 @@ class OOState(yState):
             car_point = [carPos.position.x, carPos.position.y, carPos.position.z]
             dist = math.dist(obs_point, car_point)
             #checking if the overstaking is finished
-            if (dist > dth):
+            if (dist < dth):
                 stop_overtaking = False
 
         if readySwitch == True:
